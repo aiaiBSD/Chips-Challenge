@@ -63,6 +63,11 @@ def main():
         inventory.append("E")
 
     dead = False
+    time = 0
+    finishTime = 0
+    initialTime = 0
+    completed = False
+    running = True
 
     while True:
         if nxtLvl:
@@ -72,17 +77,22 @@ def main():
                 mainBoard[x] = linesTwo[x]
             mapY = levelTwoY
             mapX = levelTwoX
-            for x in range(0, 9):
-                inventory.append("E")
+            for i in range(0, 9):
+                inventory[i] = "E"
             nxtLvl = False
             levelTwo = True
-        drawBoard(mainBoard, mapX, mapY, inventory, dead, MAPWIDTH, MAPHEIGHT)
+            initialTime = pygame.time.get_ticks()
+            completed = False
+        hint = False
+        if mainBoard[mapY][mapX] == "s":
+            hint = True
+        drawBoard(mainBoard, mapX, mapY, inventory, dead, MAPWIDTH, MAPHEIGHT, levelTwo, time, completed, finishTime, hint)
 
         checkForQuit()
         for event in pygame.event.get():
             if event.type == KEYUP:
-                if event.key in (K_LEFT, K_a) and not dead:
-                    if not mainBoard[mapY][mapX - 1] == "W" and not mainBoard[mapY][mapX - 1] == "R" and not mainBoard[mapY][mapX - 1] == "O" and not mainBoard[mapY][mapX - 1] == "B" and not mainBoard[mapY][mapX - 1] == "P" and not mainBoard[mapY][mapX - 1] == "G":
+                if event.key in (K_LEFT, K_a) and not dead and not completed:
+                    if not mainBoard[mapY][mapX - 1] == "W" and not mainBoard[mapY][mapX - 1] == "R" and not mainBoard[mapY][mapX - 1] == "O" and not mainBoard[mapY][mapX - 1] == "B" and not mainBoard[mapY][mapX - 1] == "P" and not mainBoard[mapY][mapX - 1] == "G" and not mainBoard[mapY][mapX - 1] == "M":
                         mapX = mapX - 1
                     elif mainBoard[mapY][mapX - 1] == "R" or mainBoard[mapY][mapX - 1] == "O" or mainBoard[mapY][mapX - 1] == "B" or mainBoard[mapY][mapX - 1] == "P" or mainBoard[mapY][mapX - 1] == "G":
                         go = True
@@ -96,6 +106,15 @@ def main():
                             if i == 8:
                                 go = False
                             i += 1
+                    elif mainBoard[mapY][mapX - 1] == "M" and mainBoard[mapY][mapX - 2] == "N":
+                        bulldozer = False
+                        for item in inventory:
+                            if item == "C":
+                                bulldozer = True
+                        if bulldozer:
+                            mainBoard[mapY][mapX - 1] = "N"
+                            mainBoard[mapY][mapX - 2] = "M"
+                            mapX = mapX - 1
                     elif mainBoard[mapY][mapX] == "D" and mainBoard[mapY][mapX - 1] == "W":
                         shovel = False
                         for item in inventory:
@@ -103,8 +122,8 @@ def main():
                                 shovel = True
                         if shovel:
                             mapX = mapX - 2
-                if event.key in (K_RIGHT, K_d) and not dead:
-                    if not mainBoard[mapY][mapX + 1] == "W" and not mainBoard[mapY][mapX + 1] == "R" and not mainBoard[mapY][mapX + 1] == "O" and not mainBoard[mapY][mapX + 1] == "B" and not mainBoard[mapY][mapX + 1] == "P" and not mainBoard[mapY][mapX + 1] == "G":
+                if event.key in (K_RIGHT, K_d) and not dead and not completed:
+                    if not mainBoard[mapY][mapX + 1] == "W" and not mainBoard[mapY][mapX + 1] == "R" and not mainBoard[mapY][mapX + 1] == "O" and not mainBoard[mapY][mapX + 1] == "B" and not mainBoard[mapY][mapX + 1] == "P" and not mainBoard[mapY][mapX + 1] == "G" and not mainBoard[mapY][mapX + 1] == "M":
                         mapX = mapX + 1
                     elif mainBoard[mapY][mapX + 1] == "R" or mainBoard[mapY][mapX + 1] == "O" or mainBoard[mapY][mapX + 1] == "B" or mainBoard[mapY][mapX + 1] == "P" or mainBoard[mapY][mapX + 1] == "G":
                         go = True
@@ -118,6 +137,15 @@ def main():
                             if i == 8:
                                 go = False
                             i += 1
+                    elif mainBoard[mapY][mapX + 1] == "M" and mainBoard[mapY][mapX + 2] == "N":
+                        bulldozer = False
+                        for item in inventory:
+                            if item == "C":
+                                bulldozer = True
+                        if bulldozer:
+                            mainBoard[mapY][mapX + 1] = "N"
+                            mainBoard[mapY][mapX + 2] = "M"
+                            mapX = mapX + 1
                     elif mainBoard[mapY][mapX] == "D" and mainBoard[mapY][mapX + 1] == "W":
                         shovel = False
                         for item in inventory:
@@ -125,8 +153,8 @@ def main():
                                 shovel = True
                         if shovel:
                             mapX = mapX + 2
-                if event.key in (K_UP, K_w) and not dead:
-                    if not mainBoard[mapY - 1][mapX] == "W" and not mainBoard[mapY - 1][mapX] == "R" and not mainBoard[mapY - 1][mapX] == "O" and not mainBoard[mapY - 1][mapX] == "B" and not mainBoard[mapY - 1][mapX] == "P" and not mainBoard[mapY - 1][mapX] == "G":
+                if event.key in (K_UP, K_w) and not dead and not completed:
+                    if not mainBoard[mapY - 1][mapX] == "W" and not mainBoard[mapY - 1][mapX] == "R" and not mainBoard[mapY - 1][mapX] == "O" and not mainBoard[mapY - 1][mapX] == "B" and not mainBoard[mapY - 1][mapX] == "P" and not mainBoard[mapY - 1][mapX] == "G" and not mainBoard[mapY - 1][mapX] == "M":
                         mapY = mapY - 1
                     elif mainBoard[mapY - 1][mapX] == "R" or mainBoard[mapY - 1][mapX] == "O" or mainBoard[mapY - 1][mapX] == "B" or mainBoard[mapY - 1][mapX] == "P" or mainBoard[mapY - 1][mapX] == "G":
                         go = True
@@ -140,8 +168,17 @@ def main():
                             if i == 8:
                                 go = False
                             i += 1
-                if event.key in (K_DOWN, K_s) and not dead:
-                    if not mainBoard[mapY + 1][mapX] == "W" and not mainBoard[mapY + 1][mapX] == "R" and not mainBoard[mapY + 1][mapX] == "O" and not mainBoard[mapY + 1][mapX] == "B" and not mainBoard[mapY + 1][mapX] == "P" and not mainBoard[mapY + 1][mapX] == "G":
+                    elif mainBoard[mapY - 1][mapX] == "M" and mainBoard[mapY - 2][mapX] == "N":
+                        bulldozer = False
+                        for item in inventory:
+                            if item == "C":
+                                bulldozer = True
+                        if bulldozer:
+                            mainBoard[mapY - 1][mapX] = "N"
+                            mainBoard[mapY - 2][mapX] = "M"
+                            mapY = mapY - 1
+                if event.key in (K_DOWN, K_s) and not dead and not completed:
+                    if not mainBoard[mapY + 1][mapX] == "W" and not mainBoard[mapY + 1][mapX] == "R" and not mainBoard[mapY + 1][mapX] == "O" and not mainBoard[mapY + 1][mapX] == "B" and not mainBoard[mapY + 1][mapX] == "P" and not mainBoard[mapY + 1][mapX] == "G" and not mainBoard[mapY + 1][mapX] == "M":
                         mapY = mapY + 1
                     elif mainBoard[mapY + 1][mapX] == "R" or mainBoard[mapY + 1][mapX] == "O" or mainBoard[mapY + 1][mapX] == "B" or mainBoard[mapY + 1][mapX] == "P" or mainBoard[mapY + 1][mapX] == "G":
                         go = True
@@ -155,6 +192,18 @@ def main():
                             if i == 8:
                                 go = False
                             i += 1
+                    elif mainBoard[mapY + 1][mapX] == "M" and (mainBoard[mapY + 2][mapX] == "N" or mainBoard[mapY + 2][mapX] == "H"):
+                        bulldozer = False
+                        for item in inventory:
+                            if item == "C":
+                                bulldozer = True
+                        if bulldozer:
+                            mainBoard[mapY + 1][mapX] = "N"
+                            if mainBoard[mapY + 2][mapX] == "H":
+                                mainBoard[mapY + 2][mapX] = "N"
+                            else:
+                                mainBoard[mapY + 2][mapX] = "M"
+                            mapY = mapY + 1
                 if event.key in (K_SPACE, K_x) and dead:
                     if levelTwo == False:
                         with open('CCLvl1.txt') as lvlOne:
@@ -166,13 +215,17 @@ def main():
                     elif levelTwo:
                         with open('CCLvl2.txt') as lvlTwo:
                             linesFour = [line.split() for line in lvlTwo]
-                        for x in range(MAPWIDTH):
+                        for x in range(MAPHEIGHT):
                             mainBoard[x] = linesFour[x]
                         mapY = levelTwoY
                         mapX = levelTwoX
                     for x in range(0, 9):
                         inventory[x] = "E"
                     dead = False
+                    initialTime = pygame.time.get_ticks()
+                if event.key in (K_SPACE, K_x) and completed:
+                    nxtLvl = True
+                    initialTime = pygame.time.get_ticks()
 
         if checkDie(mainBoard[mapY][mapX], inventory):
             dead = True
@@ -190,8 +243,12 @@ def main():
                     i += 1
                 mainBoard[mapY][mapX] = "N"
             if mainBoard[mapY][mapX] == "w":
-                nxtLvl = True
+                completed = True
+                if running:
+                    finishTime = int((pygame.time.get_ticks() - initialTime) / 1000)
+                running = False
 
+        time = int((pygame.time.get_ticks() - initialTime) / 1000)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -226,7 +283,9 @@ def terminate():
     pygame.quit()
     sys.exit()
 
-def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT):
+def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT, lvl, time, completed, finishTime, hint):
+    if lvl:
+        MAPHEIGHT += 1
     DISPLAYSURF.fill(BLACK)
     if x <= 3 and y <= 3:
         xStarting = (int)(4 - x)
@@ -284,6 +343,8 @@ def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT):
                 drawTile(board[y][x], y - yStarting, x - xStarting)
     funkyBoi = pygame.image.load('FunkyMan.png')
     DISPLAYSURF.blit(funkyBoi, [369, 362])
+    timeIm = BASICFONT.render(str(time), True, BLUE)
+    DISPLAYSURF.blit(timeIm, (10, 10))
     i = 0
     for x in (inventory):
         left = i * 90
@@ -359,12 +420,30 @@ def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT):
         pygame.draw.line(DISPLAYSURF, WHITE, (left + TILESIZE, top), (left + TILESIZE, top + TILESIZE), 5)
         pygame.draw.line(DISPLAYSURF, WHITE, (left, top + TILESIZE), (left + TILESIZE, top + TILESIZE), 5)
         i += 1
-        if dead:
-            pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
-            textSurf, textRect = makeText("You Died", WHITE, BLACK, 370, 300)
-            DISPLAYSURF.blit(textSurf, textRect)
-            textSurfTwo, textRectTwo = makeText("Press Space to Reset", WHITE, BLACK, 300, 400)
-            DISPLAYSURF.blit(textSurfTwo, textRectTwo)
+    if dead:
+        pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
+        textSurf, textRect = makeText("You Died", WHITE, BLACK, 370, 300)
+        DISPLAYSURF.blit(textSurf, textRect)
+        textSurfTwo, textRectTwo = makeText("Press Space to Reset", WHITE, BLACK, 300, 400)
+        DISPLAYSURF.blit(textSurfTwo, textRectTwo)
+    if completed:
+        pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
+        textSurf, textRect = makeText("You Made It!", WHITE, BLACK, 370, 300)
+        DISPLAYSURF.blit(textSurf, textRect)
+        textSurfTwo, textRectTwo = makeText("It took you", WHITE, BLACK, 315, 350)
+        DISPLAYSURF.blit(textSurfTwo, textRectTwo)
+        timeIm = BASICFONT.render(str(finishTime), True, WHITE)
+        DISPLAYSURF.blit(timeIm, (425, 350))
+        secondSurf, secondRect = makeText("seconds.", WHITE, BLACK, 455, 350)
+        DISPLAYSURF.blit(secondSurf, secondRect)
+        textSurfThree, textRectThree = makeText("Press Space to Move on to Next Level", WHITE, BLACK, 270, 400)
+        DISPLAYSURF.blit(textSurfThree, textRectThree)
+    if hint:
+        pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
+        textSurf, textRect = makeText("Pick up the Bulldozer", WHITE, BLACK, 320, 300)
+        DISPLAYSURF.blit(textSurf, textRect)
+        textSurfTwo, textRectTwo = makeText("To Move the Wall Blocks With White Circles!", WHITE, BLACK, 200, 350)
+        DISPLAYSURF.blit(textSurfTwo, textRectTwo)
 
 def makeText(text, color, bgcolor, top, left):
     textSurf = BASICFONT.render(text, True, color, bgcolor)
