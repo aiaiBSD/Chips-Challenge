@@ -25,12 +25,12 @@ BLUE = (0, 0, 255)
 SEABLUE = (0, 105, 148)
 PURPLE = (128, 0, 128)
 YELLOW = (255, 255, 0)
-FLAME = (226, 88, 34)
 ICEBLUE = (165, 242, 243)
 DIRT = (124, 94, 66)
 DIMGRAY = (64, 64, 64)
 ORANGE = (255, 165, 0)
 CHARCOAL = (21, 27, 31)
+DARKORANGE = (255, 140, 0)
 
 TILECOLOR = LIGHTGRAY
 TEXTCOLOR = BLACK
@@ -68,6 +68,21 @@ def main():
     initialTime = 0
     completed = False
     running = True
+    win = False
+
+    spriteOneX = 26
+    spriteOneY = 7
+    spriteTwoX = 28
+    spriteTwoY = 11
+    spriteThreeX = 2
+    spriteThreeY = 7
+    spriteFourX = 4
+    spriteFourY = 11
+    spriteFiveX = 14
+    spriteFiveY = 7
+    spriteSixX = 16
+    spriteSixY = 11
+    spriteDirection = "Down"
 
     while True:
         if nxtLvl:
@@ -83,10 +98,11 @@ def main():
             levelTwo = True
             initialTime = pygame.time.get_ticks()
             completed = False
+            running = True
         hint = False
         if mainBoard[mapY][mapX] == "s":
             hint = True
-        drawBoard(mainBoard, mapX, mapY, inventory, dead, MAPWIDTH, MAPHEIGHT, levelTwo, time, completed, finishTime, hint)
+        drawBoard(mainBoard, mapX, mapY, inventory, dead, MAPWIDTH, MAPHEIGHT, levelTwo, time, completed, finishTime, hint, win, spriteOneX, spriteOneY, spriteTwoX, spriteTwoY, spriteThreeX, spriteThreeY, spriteFourX, spriteFourY, spriteFiveX, spriteFiveY, spriteSixX, spriteSixY)
 
         checkForQuit()
         for event in pygame.event.get():
@@ -226,8 +242,10 @@ def main():
                 if event.key in (K_SPACE, K_x) and completed:
                     nxtLvl = True
                     initialTime = pygame.time.get_ticks()
+                if event.key in (K_SPACE, K_x) and win:
+                    terminate()
 
-        if checkDie(mainBoard[mapY][mapX], inventory):
+        if checkDie(mainBoard[mapY][mapX], mapX, mapY, inventory, spriteOneX, spriteOneY, spriteTwoX, spriteTwoY, spriteThreeX, spriteThreeY, spriteFourX, spriteFourY, spriteFiveX, spriteFiveY, spriteSixX, spriteSixY, levelTwo):
             dead = True
 
         if not mainBoard[mapY][mapX] == "N":
@@ -247,6 +265,43 @@ def main():
                 if running:
                     finishTime = int((pygame.time.get_ticks() - initialTime) / 1000)
                 running = False
+            if mainBoard[mapY][mapX] == "U":
+                win = True
+                if running:
+                    finishTime = int((pygame.time.get_ticks() - initialTime) / 1000)
+                running = False
+
+        if time % 2 == 0:
+            if spriteDirection == "Down" and spriteOneY < 11:
+                spriteOneY += 1
+                spriteTwoY -= 1
+                spriteThreeY += 1
+                spriteFourY -= 1
+                spriteFiveY += 1
+                spriteSixY -= 1
+            elif spriteDirection == "Down":
+                spriteDirection = "Up"
+                spriteOneY -= 1
+                spriteTwoY += 1
+                spriteThreeY -= 1
+                spriteFourY += 1
+                spriteFiveY -= 1
+                spriteSixY += 1
+            elif spriteDirection == "Up" and spriteOneY > 7:
+                spriteOneY -= 1
+                spriteTwoY += 1
+                spriteThreeY -= 1
+                spriteFourY += 1
+                spriteFiveY -= 1
+                spriteSixY += 1
+            elif spriteDirection == "Up":
+                spriteDirection = "Down"
+                spriteOneY += 1
+                spriteTwoY -= 1
+                spriteThreeY += 1
+                spriteFourY -= 1
+                spriteFiveY += 1
+                spriteSixY -= 1
 
         time = int((pygame.time.get_ticks() - initialTime) / 1000)
         pygame.display.update()
@@ -260,7 +315,7 @@ def checkForQuit():
             terminate()
         pygame.event.post(event)
 
-def checkDie(block, invent):
+def checkDie(block, x, y, invent, oneX, oneY, twoX, twoY, threeX, threeY, fourX, fourY, fiveX, fiveY, sixX, sixY, level):
     water = False
     fire = False
     ice = False
@@ -277,15 +332,33 @@ def checkDie(block, invent):
         return True
     if block == "I" and not ice:
         return True
+    if x == oneX and y == oneY and level:
+        return True
+    if x == twoX and y == twoY and level:
+        return True
+    if x == threeX and y == threeY and level:
+        return True
+    if x == fourX and y == fourY and level:
+        return True
+    if x == fiveX and y == fiveY and level:
+        return True
+    if x == sixX and y == sixY and level:
+        return True
     return False
 
 def terminate():
     pygame.quit()
     sys.exit()
 
-def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT, lvl, time, completed, finishTime, hint):
+def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT, lvl, time, completed, finishTime, hint, win, oneX, oneY, twoX, twoY, threeX, threeY, fourX, fourY, fiveX, fiveY, sixX, sixY):
     if lvl:
         MAPHEIGHT += 1
+        board[oneY][oneX] = "Sprite"
+        board[twoY][twoX] = "Sprite"
+        board[threeY][threeX] = "Sprite"
+        board[fourY][fourX] = "Sprite"
+        board[fiveY][fiveX] = "Sprite"
+        board[sixY][sixX] = "Sprite"
     DISPLAYSURF.fill(BLACK)
     if x <= 3 and y <= 3:
         xStarting = (int)(4 - x)
@@ -430,10 +503,10 @@ def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT, lvl, time, comp
         pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
         textSurf, textRect = makeText("You Made It!", WHITE, BLACK, 370, 300)
         DISPLAYSURF.blit(textSurf, textRect)
-        textSurfTwo, textRectTwo = makeText("It took you", WHITE, BLACK, 315, 350)
+        textSurfTwo, textRectTwo = makeText("It took you", WHITE, BLACK, 305, 350)
         DISPLAYSURF.blit(textSurfTwo, textRectTwo)
         timeIm = BASICFONT.render(str(finishTime), True, WHITE)
-        DISPLAYSURF.blit(timeIm, (425, 350))
+        DISPLAYSURF.blit(timeIm, (415, 350))
         secondSurf, secondRect = makeText("seconds.", WHITE, BLACK, 455, 350)
         DISPLAYSURF.blit(secondSurf, secondRect)
         textSurfThree, textRectThree = makeText("Press Space to Move on to Next Level", WHITE, BLACK, 270, 400)
@@ -444,6 +517,27 @@ def drawBoard(board, x, y, inventory, dead, MAPWIDTH, MAPHEIGHT, lvl, time, comp
         DISPLAYSURF.blit(textSurf, textRect)
         textSurfTwo, textRectTwo = makeText("To Move the Wall Blocks With White Circles!", WHITE, BLACK, 200, 350)
         DISPLAYSURF.blit(textSurfTwo, textRectTwo)
+        textSurfThree, textRectThree = makeText("These Blocks replace Water with Walking Blocks!", WHITE, BLACK, 180, 400)
+        DISPLAYSURF.blit(textSurfThree, textRectThree)
+    if win:
+        pygame.draw.rect(DISPLAYSURF, BLACK, (140, 120, 540, 520))
+        textSurf, textRect = makeText("You Made It!", WHITE, BLACK, 370, 300)
+        DISPLAYSURF.blit(textSurf, textRect)
+        textSurfTwo, textRectTwo = makeText("It took you", WHITE, BLACK, 305, 350)
+        DISPLAYSURF.blit(textSurfTwo, textRectTwo)
+        timeIm = BASICFONT.render(str(finishTime), True, WHITE)
+        DISPLAYSURF.blit(timeIm, (415, 350))
+        secondSurf, secondRect = makeText("seconds.", WHITE, BLACK, 455, 350)
+        DISPLAYSURF.blit(secondSurf, secondRect)
+        textSurfThree, textRectThree = makeText("Press Space to Exit", WHITE, BLACK, 320, 400)
+        DISPLAYSURF.blit(textSurfThree, textRectThree)
+    if lvl:
+        board[oneY][oneX] = "N"
+        board[twoY][twoX] = "N"
+        board[threeY][threeX] = "N"
+        board[fourY][fourX] = "N"
+        board[fiveY][fiveX] = "N"
+        board[sixY][sixX] = "N"
 
 def makeText(text, color, bgcolor, top, left):
     textSurf = BASICFONT.render(text, True, color, bgcolor)
@@ -459,16 +553,21 @@ def drawTile(block, yPos, xPos):
     if block == "W":
         pygame.draw.rect(DISPLAYSURF, DARKGRAY, (left, top, TILESIZE, TILESIZE))
     if block == "H":
-        pygame.draw.rect(DISPLAYSURF, SEABLUE, (left, top, TILESIZE, TILESIZE))
+        water = pygame.image.load('water.png')
+        DISPLAYSURF.blit(water, [left - 14, top - 14])
     if block == "F":
-        pygame.draw.rect(DISPLAYSURF, FLAME, (left, top, TILESIZE, TILESIZE))
+        pygame.draw.rect(DISPLAYSURF, LIGHTGRAY, (left, top, TILESIZE, TILESIZE))
+        fire = pygame.image.load('fire.png')
+        DISPLAYSURF.blit(fire, [left, top])
     if block == "M":
         pygame.draw.rect(DISPLAYSURF, DARKGRAY, (left, top, TILESIZE, TILESIZE))
         pygame.draw.circle(DISPLAYSURF, WHITE, (left + (int)(TILESIZE/2), top + (int)(TILESIZE/2)), (int)(TILESIZE/4))
     if block == "I":
-        pygame.draw.rect(DISPLAYSURF, ICEBLUE, (left, top, TILESIZE, TILESIZE))
+        ice = pygame.image.load('ice.png')
+        DISPLAYSURF.blit(ice, [left, top])
     if block == "D":
-        pygame.draw.rect(DISPLAYSURF, DIRT, (left, top, TILESIZE, TILESIZE))
+        dirt = pygame.image.load('dirt.png')
+        DISPLAYSURF.blit(dirt, [left, top])
     if block == "r":
         pygame.draw.rect(DISPLAYSURF, LIGHTGRAY, (left, top, TILESIZE, TILESIZE))
         pygame.draw.circle(DISPLAYSURF, RED, (left + (int)(TILESIZE / 2), top + (int)(TILESIZE * 0.75)),
@@ -613,6 +712,10 @@ def drawTile(block, yPos, xPos):
         pygame.draw.line(DISPLAYSURF, WHITE, (left + TILESIZE * 0.25, top + TILESIZE *0.25), (left + TILESIZE * 0.25, top + TILESIZE *0.75), 4)
         pygame.draw.line(DISPLAYSURF, WHITE, (left + TILESIZE * 0.75, top + TILESIZE *0.25), (left + TILESIZE * 0.75, top + TILESIZE *0.75), 4)
         pygame.draw.line(DISPLAYSURF, WHITE, (left + TILESIZE * 0.25, top + TILESIZE *0.5), (left + TILESIZE * 0.75, top + TILESIZE *0.5), 4)
+    if block == "Sprite":
+        pygame.draw.rect(DISPLAYSURF, LIGHTGRAY, (left, top, TILESIZE, TILESIZE))
+        fizzy = pygame.image.load('fizzy.png')
+        DISPLAYSURF.blit(fizzy, [left, top])
     pygame.draw.line(DISPLAYSURF, DARKGRAY, (left, top), (left + TILESIZE, top), 3)
     pygame.draw.line(DISPLAYSURF, DARKGRAY, (left, top), (left, top + TILESIZE), 3)
     pygame.draw.line(DISPLAYSURF, DARKGRAY, (left + TILESIZE, top), (left + TILESIZE, top + TILESIZE), 3)
